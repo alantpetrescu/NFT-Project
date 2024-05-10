@@ -7,13 +7,10 @@ import {IERC721Errors} from "./draft-IERC6093.sol";
 
 /// @notice This is a mock contract of the ERC721 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC721.sol
-contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
+contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
     /*//////////////////////////////////////////////////////////////
                          METADATA STORAGE/LOGIC
     //////////////////////////////////////////////////////////////*/
-
-    error ERC721AlreadyInitialized();
-
     error ERC721AlreadyMinted(uint256 tokenId, address owner);
 
     string internal _name;
@@ -43,16 +40,14 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     function ownerOf(
         uint256 id
     ) public view virtual override returns (address owner) {
-        require(
-            (owner = _ownerOf[id]) != address(0),
-            ERC721InvalidOwner(owner)
-        );
+        if ((owner = _ownerOf[id]) == address(0))
+            revert ERC721NonexistentToken(id);
     }
 
     function balanceOf(
         address owner
     ) public view virtual override returns (uint256) {
-        require(owner != address(0), ERC721InvalidOwner(owner));
+        if (owner == address(0)) revert ERC721InvalidOwner(owner);
 
         return _balanceOf[owner];
     }
@@ -82,18 +77,11 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
                                INITIALIZE
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev A bool to track whether the contract has been initialized.
-    bool private initialized;
-
     /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
     /// syntaxes, we add an initialization function that can be called only once.
-    function initialize(string memory name_, string memory symbol_) public {
-        require(!initialized, ERC721AlreadyInitialized());
-
+    constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
-
-        initialized = true;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -106,10 +94,9 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     ) public payable virtual override {
         address owner = _ownerOf[id];
 
-        require(
-            msg.sender == owner || _isApprovedForAll[owner][msg.sender],
-            ERC721InvalidApprover(spender)
-        );
+        if (
+            msg.sender != owner && _isApprovedForAll[owner][msg.sender] == false
+        ) revert ERC721InvalidApprover(spender);
 
         _getApproved[id] = spender;
 
@@ -130,16 +117,15 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
         address to,
         uint256 id
     ) public payable virtual override {
-        require(from == _ownerOf[id], ERC721InvalidOwner(_ownerOf[id]));
+        if (from != _ownerOf[id]) revert ERC721InvalidOwner(_ownerOf[id]);
 
-        require(to != address(0), ERC721InvalidReceiver(to));
+        if (to == address(0)) revert ERC721InvalidReceiver(to);
 
-        require(
-            msg.sender == from ||
-                _isApprovedForAll[from][msg.sender] ||
-                msg.sender == _getApproved[id],
-            ERC721InsufficientApproval(from, id)
-        );
+        if (
+            msg.sender != from &&
+            _isApprovedForAll[from][msg.sender] == false &&
+            msg.sender != _getApproved[id]
+        ) revert ERC721InsufficientApproval(from, id);
 
         // Underflow of the sender's balance is impossible because we check for
         // ownership above and the recipient's balance can't realistically overflow.
@@ -161,17 +147,16 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     ) public payable virtual override {
         transferFrom(from, to, id);
 
-        require(
-            !_isContract(to) ||
-                IERC721TokenReceiver(to).onERC721Received(
-                    msg.sender,
-                    from,
-                    id,
-                    ""
-                ) ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            ERC721InvalidReceiver(to);
-        );
+        if (
+            _isContract(to) &&
+            IERC721TokenReceiver(to).onERC721Received(
+                msg.sender,
+                from,
+                id,
+                ""
+            ) !=
+            IERC721TokenReceiver.onERC721Received.selector
+        ) revert ERC721InvalidReceiver(to);
     }
 
     function safeTransferFrom(
@@ -182,17 +167,16 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     ) public payable virtual override {
         transferFrom(from, to, id);
 
-        require(
-            !_isContract(to) ||
-                IERC721TokenReceiver(to).onERC721Received(
-                    msg.sender,
-                    from,
-                    id,
-                    data
-                ) ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            ERC721InvalidReceiver(to)
-        );
+        if (
+            _isContract(to) &&
+            IERC721TokenReceiver(to).onERC721Received(
+                msg.sender,
+                from,
+                id,
+                data
+            ) !=
+            IERC721TokenReceiver.onERC721Received.selector
+        ) revert ERC721InvalidReceiver(to);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -213,12 +197,10 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     //////////////////////////////////////////////////////////////*/
 
     function _mint(address to, uint256 id) internal virtual {
-        require(to != address(0), ERC721InvalidReceiver(to));
+        if (to == address(0)) revert ERC721InvalidReceiver(to);
 
-        require(
-            _ownerOf[id] == address(0),
-            ERC721AlreadyMinted(id, _ownerOf[id])
-        );
+        if (_ownerOf[id] != address(0))
+            revert ERC721AlreadyMinted(id, _ownerOf[id]);
 
         // Counter overflow is incredibly unrealistic.
 
@@ -232,7 +214,7 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     function _burn(uint256 id) internal virtual {
         address owner = _ownerOf[id];
 
-        require(owner != address(0), ERC721NonexistentToken(id));
+        if (owner == address(0)) revert ERC721NonexistentToken(id);
 
         _balanceOf[owner]--;
 
@@ -250,17 +232,16 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     function _safeMint(address to, uint256 id) internal virtual {
         _mint(to, id);
 
-        require(
-            !_isContract(to) ||
-                IERC721TokenReceiver(to).onERC721Received(
-                    msg.sender,
-                    address(0),
-                    id,
-                    ""
-                ) ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            ERC721InvalidReceiver(to)
-        );
+        if (
+            _isContract(to) &&
+            IERC721TokenReceiver(to).onERC721Received(
+                msg.sender,
+                address(0),
+                id,
+                ""
+            ) !=
+            IERC721TokenReceiver.onERC721Received.selector
+        ) revert ERC721InvalidReceiver(to);
     }
 
     function _safeMint(
@@ -270,17 +251,16 @@ contract MockERC721 is IERC721Metadata, ERC165, IERC721Errors {
     ) internal virtual {
         _mint(to, id);
 
-        require(
-            !_isContract(to) ||
-                IERC721TokenReceiver(to).onERC721Received(
-                    msg.sender,
-                    address(0),
-                    id,
-                    data
-                ) ==
-                IERC721TokenReceiver.onERC721Received.selector,
-            ERC721InvalidReceiver(to)
-        );
+        if (
+            _isContract(to) &&
+            IERC721TokenReceiver(to).onERC721Received(
+                msg.sender,
+                address(0),
+                id,
+                data
+            ) !=
+            IERC721TokenReceiver.onERC721Received.selector
+        ) revert ERC721InvalidReceiver(to);
     }
 
     /*//////////////////////////////////////////////////////////////
