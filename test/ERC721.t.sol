@@ -12,11 +12,13 @@ contract ERC721Test is Test {
         address indexed _to,
         uint256 indexed _tokenId
     );
+
     event Approval(
         address indexed _owner,
         address indexed _approved,
         uint256 indexed _tokenId
     );
+
     event ApprovalForAll(
         address indexed _owner,
         address indexed _operator,
@@ -29,7 +31,7 @@ contract ERC721Test is Test {
         nft = new ERC721Harness(
             "test",
             "TST",
-            "bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
+            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
         );
     }
 
@@ -39,6 +41,21 @@ contract ERC721Test is Test {
 
     function test_Symbol_ExpectSymbol_TST() public view {
         assertEq(nft.symbol(), "TST");
+    }
+
+    function test_TokenURI_ExpectURI() public view {
+        assertEq(
+            nft.tokenURI(0),
+            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q/0.json"
+        );
+        assertEq(
+            nft.tokenURI(1),
+            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q/1.json"
+        );
+        assertEq(
+            nft.tokenURI(2),
+            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q/2.json"
+        );
     }
 
     // ERC721 -- function _mint(address to, uint256 id) -- Tests

@@ -31,7 +31,12 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
     function tokenURI(uint256 _tokenId) external view returns (string memory) {
         return
             string(
-                abi.encodePacked(_tokenUri, "/", Strings.toString(_tokenId))
+                abi.encodePacked(
+                    _tokenUri,
+                    "/",
+                    Strings.toString(_tokenId),
+                    ".json"
+                )
             );
     }
 
@@ -92,7 +97,7 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
     ) {
         _name = name_;
         _symbol = symbol_;
-        _tokenUri = tokenUri_; // "bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
+        _tokenUri = tokenUri_; // "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
 
         _mint(msg.sender, 0);
         _mint(msg.sender, 1);
