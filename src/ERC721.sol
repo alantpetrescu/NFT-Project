@@ -4,18 +4,23 @@ pragma solidity >=0.8.2;
 import {IERC721, IERC721Metadata} from "forge-std/interfaces/IERC721.sol";
 import {IERC165, ERC165} from "./ERC165.sol";
 import {IERC721Errors} from "./draft-IERC6093.sol";
+import "https://github.com/provable-things/ethereum-api/blob/master/provableAPI.sol"; // to use BigInt for conversion from uint256 to string
 
 /// @notice This is a mock contract of the ERC721 standard for testing purposes only, it SHOULD NOT be used in production.
 /// @dev Forked from: https://github.com/transmissions11/solmate/blob/0384dbaaa4fcb5715738a9254a7c0a4cb62cf458/src/tokens/ERC721.sol
-contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
+contract ERC721 is IERC721Metadata, ERC165, IERC721Errors, usingOraclize {
     /*//////////////////////////////////////////////////////////////
                          METADATA STORAGE/LOGIC
     //////////////////////////////////////////////////////////////*/
+    using BigInt for BigInt.BigInt;
+
     error ERC721AlreadyMinted(uint256 tokenId, address owner);
 
     string internal _name;
 
     string internal _symbol;
+
+    string internal _tokenUri;
 
     function name() external view override returns (string memory) {
         return _name;
@@ -23,6 +28,12 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
 
     function symbol() external view override returns (string memory) {
         return _symbol;
+    }
+
+    function tokenURI(uint256 _tokenId) external view returns (string memory) {
+        BigInt.BigInt memory tokenIdBigInt = BigInt.toBigInt(_tokenId);
+        return
+            string(abi.encodePacked(_tokenUri, "/", tokenIdBigInt.toString()));
     }
 
     function tokenURI(
@@ -79,9 +90,18 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
 
     /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
     /// syntaxes, we add an initialization function that can be called only once.
-    constructor(string memory name_, string memory symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        string memory tokenUri_
+    ) {
         _name = name_;
         _symbol = symbol_;
+        _tokenUri = tokenUri_; // "bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
+
+        _mint(msg.sender, 0);
+        _mint(msg.sender, 1);
+        _mint(msg.sender, 2);
     }
 
     /*//////////////////////////////////////////////////////////////

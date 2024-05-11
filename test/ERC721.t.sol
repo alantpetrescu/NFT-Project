@@ -26,7 +26,11 @@ contract ERC721Test is Test {
     ERC721Harness public nft;
 
     function setUp() public {
-        nft = new ERC721Harness("test", "TST");
+        nft = new ERC721Harness(
+            "test",
+            "TST",
+            "bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
+        );
     }
 
     function test_Name_ExpectText_test() public view {
@@ -50,7 +54,7 @@ contract ERC721Test is Test {
 
     function test_ExposedMint_ExpectEvent_Transfer() public {
         address receiver = address(1);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         vm.expectEmit(true, true, true, false);
         emit Transfer(address(0), receiver, tokenId);
@@ -59,7 +63,7 @@ contract ERC721Test is Test {
 
     function test_ExposedMint_ExpectError_ERC721AlreadyMinted() public {
         address receiver = address(1);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(receiver, tokenId);
 
@@ -71,7 +75,7 @@ contract ERC721Test is Test {
     // ERC721 -- function _burn(address to, uint256 id) -- Tests
 
     function test_ExposedBurn_ExpectError_ERC721NonexistentToken() public {
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         bytes4 selector = IERC721Errors.ERC721NonexistentToken.selector;
         vm.expectRevert(abi.encodeWithSelector(selector, tokenId));
@@ -80,7 +84,7 @@ contract ERC721Test is Test {
 
     function test_ExposedBurn_ExpectEvent_Transfer() public {
         address receiver = address(1);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(receiver, tokenId);
 
@@ -92,7 +96,7 @@ contract ERC721Test is Test {
     // ERC721 -- function ownerOf(uint256 id) -- Tests
 
     function test_OwnerOf_ExpectError_ERC721NonexistentToken() public {
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         bytes4 selector = IERC721Errors.ERC721NonexistentToken.selector;
         vm.expectRevert(abi.encodeWithSelector(selector, tokenId));
@@ -100,7 +104,7 @@ contract ERC721Test is Test {
     }
 
     function test_OwnerOf_ExpectAddress_1() public {
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
         address owner = address(1);
 
         nft.exposed_mint(owner, tokenId);
@@ -118,7 +122,7 @@ contract ERC721Test is Test {
     }
 
     function test_BalanceOf_ExpectValue_1() public {
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
         address owner = address(1);
 
         nft.exposed_mint(owner, tokenId);
@@ -128,7 +132,7 @@ contract ERC721Test is Test {
     function test_BalanceOf_ExpectValue_3() public {
         address owner = address(1);
 
-        for (uint256 tokenId = 0; tokenId < 3; tokenId++)
+        for (uint256 tokenId = 3; tokenId < 6; tokenId++)
             nft.exposed_mint(owner, tokenId);
 
         assertEq(nft.balanceOf(owner), 3);
@@ -138,7 +142,7 @@ contract ERC721Test is Test {
 
     function test_Approve_ExpectError_ERC721InvalidApprover() public {
         address owner = address(1);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(owner, tokenId);
         address spender = address(2);
@@ -151,7 +155,7 @@ contract ERC721Test is Test {
 
     function test_Approve_ExpectEvent_Approval() public {
         address owner = address(1);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(owner, tokenId);
         address spender = address(2);
@@ -181,7 +185,7 @@ contract ERC721Test is Test {
         address owner = address(1);
         address from = address(2);
         address to = address(3);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(owner, tokenId);
 
@@ -194,7 +198,7 @@ contract ERC721Test is Test {
         address owner = address(1);
         address from = address(1);
         address to = address(0);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(owner, tokenId);
 
@@ -207,7 +211,7 @@ contract ERC721Test is Test {
         address owner = address(1);
         address from = address(1);
         address to = address(2);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(owner, tokenId);
 
@@ -221,7 +225,7 @@ contract ERC721Test is Test {
         address owner = address(1);
         address from = address(1);
         address to = address(2);
-        uint256 tokenId = 0;
+        uint256 tokenId = 3;
 
         nft.exposed_mint(owner, tokenId);
 
