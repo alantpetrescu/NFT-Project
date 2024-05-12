@@ -88,8 +88,6 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
                                INITIALIZE
     //////////////////////////////////////////////////////////////*/
 
-    /// @dev To hide constructor warnings across solc versions due to different constructor visibility requirements and
-    /// syntaxes, we add an initialization function that can be called only once.
     constructor(
         string memory name_,
         string memory symbol_,

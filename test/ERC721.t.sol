@@ -31,7 +31,7 @@ contract ERC721Test is Test {
         nft = new ERC721Harness(
             "test",
             "TST",
-            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q"
+            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm"
         );
     }
 
@@ -46,15 +46,15 @@ contract ERC721Test is Test {
     function test_TokenURI_ExpectURI() public view {
         assertEq(
             nft.tokenURI(0),
-            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q/0.json"
+            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm/0.json"
         );
         assertEq(
             nft.tokenURI(1),
-            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q/1.json"
+            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm/1.json"
         );
         assertEq(
             nft.tokenURI(2),
-            "ipfs://bafybeia6hkf3vi4mpb34jpo34rfssz7icqbjserzqrwaw5miyge7jjet2q/2.json"
+            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm/2.json"
         );
     }
 
