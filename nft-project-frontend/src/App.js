@@ -26,7 +26,7 @@ function App() {
       <Container style={{ paddingTop: '50px' }}>
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-            <CircularProgress />
+            <CircularProgress style={{ color: 'white' }}/>
           </div>
         )}
         <Grid container spacing={3}>

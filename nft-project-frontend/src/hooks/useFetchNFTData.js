@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import contract from '../contracts/contract';
 
+const IPFS_GATEWAY = 'https://ipfs.infura.io/ipfs/';
+
 const useFetchNFTData = () => {
   const [cardData, setCardData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,33 +12,30 @@ const useFetchNFTData = () => {
 
     const fetchData = async () => {
       try {
-        const tokenIds = [0];
+        const tokenIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
         const dataPromises = tokenIds.map(async (id) => {
           try {
             const tokenURI = await contract.methods.tokenURI(id).call();
-            console.log(tokenURI);
-            const ipfsURL = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
-            const response = await fetch(ipfsURL);
+            const response = await fetch(tokenURI);
 
             if (!response.ok) {
               throw new Error(`Failed to fetch metadata for token ${id}`);
             }
 
             const metadata = await response.json();
-            const imageIpfsUrl = metadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
             if (isMounted) {
               return {
                 id,
-                image: imageIpfsUrl,
+                image: metadata.image,
                 title: metadata.name,
                 details: metadata.description,
               };
             }
-            return null; 
+            return null;
           } catch (error) {
             console.error(`Error fetching data for token ${id}:`, error);
-            return null; 
+            return null;
           }
         });
 
