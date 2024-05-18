@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import contract from '../contracts/contract';
 
+const IPFS_GATEWAY = 'https://ipfs.infura.io/ipfs/';
+
 const useFetchNFTData = () => {
   const [cardData, setCardData] = useState([]);
   const [loading, setLoading] = useState(true);
