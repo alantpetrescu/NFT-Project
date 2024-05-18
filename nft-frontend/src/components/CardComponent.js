@@ -1,9 +1,10 @@
 import React from 'react';
 import { Card, CardMedia, CardContent, Typography, CardActionArea } from '@mui/material';
+import PropTypes from 'prop-types';
 
 function CardComponent({ image, title, onClick }) {
   return (
-    <Card onClick={onClick} sx={{ maxWidth: 345 }}>
+    <Card onClick={onClick} sx={{ maxWidth: 345, transition: 'transform 0.3s', '&:hover': { transform: 'scale(1.05)' } }}>
       <CardActionArea>
         <CardMedia
           component="img"
@@ -15,7 +16,7 @@ function CardComponent({ image, title, onClick }) {
             objectFit: 'cover',
           }}
         />
-        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60px' }}>
+        <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
           <Typography gutterBottom variant="h5" component="div" sx={{ textAlign: 'center' }}>
             {title}
           </Typography>
@@ -25,4 +26,10 @@ function CardComponent({ image, title, onClick }) {
   );
 }
 
-export default CardComponent;
+CardComponent.propTypes = {
+  image: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
+
+export default React.memo(CardComponent);

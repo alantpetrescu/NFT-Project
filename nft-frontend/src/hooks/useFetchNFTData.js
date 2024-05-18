@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import contract from '../contracts/contract';
 
-const IPFS_GATEWAY = 'https://ipfs.infura.io/ipfs/';
-
 const useFetchNFTData = () => {
   const [cardData, setCardData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +10,7 @@ const useFetchNFTData = () => {
 
     const fetchData = async () => {
       try {
-        const tokenIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+        const tokenIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
         const dataPromises = tokenIds.map(async (id) => {
           try {
@@ -24,12 +22,20 @@ const useFetchNFTData = () => {
             }
 
             const metadata = await response.json();
+            let owner = null;
+            try {
+              owner = await contract.methods.ownerOf(id).call();
+            } catch (error) {
+              console.error(`Error fetching owner for token ${id}:`, error);
+            }
+            
             if (isMounted) {
               return {
                 id,
                 image: metadata.image,
                 title: metadata.name,
                 details: metadata.description,
+                owner: owner || 'No owner'
               };
             }
             return null;
