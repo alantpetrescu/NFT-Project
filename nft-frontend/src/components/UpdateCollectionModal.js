@@ -5,13 +5,14 @@ import { useSnackbar } from 'notistack';
 
 const UpdateCollectionModal = ({ isOpen, onClose }) => {
   const { updateMetadata, updating, error } = useUpdateCollectionMetadata();
+  const [privateKey, setPrivateKey] = useState('');
   const [newName, setNewName] = useState('');
   const [newSymbol, setNewSymbol] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const success = await updateMetadata(newName.trim(), newSymbol.trim());
+    const success = await updateMetadata(privateKey.trim(), newName.trim(), newSymbol.trim());
     if (success) {
       enqueueSnackbar('Collection metadata updated successfully!', { variant: 'success' });
       onClose();
@@ -32,6 +33,32 @@ const UpdateCollectionModal = ({ isOpen, onClose }) => {
           Update Collection Metadata
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
+          <TextField
+            label="Private Key"
+            type="password"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value.trim())}
+            fullWidth
+            margin="normal"
+            required
+            variant="filled"
+            InputProps={{
+              sx: {
+                backgroundColor: '#ffffff',
+                color: '#000',
+                padding: '12px 14px',
+                '&:hover': {
+                  backgroundColor: '#ffffff'
+                },
+                '&.Mui-focused': {
+                  backgroundColor: '#ffffff'
+                }
+              }
+            }}
+            InputLabelProps={{
+              sx: { color: '#000' }
+            }}
+          />
           <TextField
             label="New Collection Name"
             value={newName}

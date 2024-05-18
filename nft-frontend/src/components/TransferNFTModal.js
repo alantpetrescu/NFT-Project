@@ -5,15 +5,17 @@ import { useSnackbar } from 'notistack';
 
 const TransferNFTModal = ({ isOpen, onClose }) => {
   const { transferNFT, transferring, error } = useTransferNFT();
+  const [privateKey, setPrivateKey] = useState('');
+  const [fromAddress, setFromAddress] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [tokenId, setTokenId] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const success = await transferNFT(toAddress.trim(), tokenId.trim());
+    const success = await transferNFT(privateKey.trim(), fromAddress.trim(), toAddress.trim(), tokenId.trim());
     if (success) {
-      enqueueSnackbar('NFT transferred successfully!', { variant: 'success' });
+      enqueueSnackbar('Transfer NFT successful!', { variant: 'success' });
       onClose();
     } else {
       enqueueSnackbar(error || 'Failed to transfer NFT.', { variant: 'error' });
@@ -33,9 +35,60 @@ const TransferNFTModal = ({ isOpen, onClose }) => {
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
+            label="Private Key"
+            type="password"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            fullWidth
+            margin="normal"
+            required
+            variant="filled"
+            InputProps={{
+              sx: {
+                backgroundColor: '#ffffff',
+                color: '#000',
+                padding: '12px 14px',
+                '&:hover': {
+                  backgroundColor: '#ffffff'
+                },
+                '&.Mui-focused': {
+                  backgroundColor: '#ffffff'
+                }
+              }
+            }}
+            InputLabelProps={{
+              sx: { color: '#000' }
+            }}
+          />
+          <TextField
+            label="From Address"
+            value={fromAddress}
+            onChange={(e) => setFromAddress(e.target.value)}
+            fullWidth
+            margin="normal"
+            required
+            variant="filled"
+            InputProps={{
+              sx: {
+                backgroundColor: '#ffffff',
+                color: '#000',
+                padding: '12px 14px',
+                '&:hover': {
+                  backgroundColor: '#ffffff'
+                },
+                '&.Mui-focused': {
+                  backgroundColor: '#ffffff'
+                }
+              }
+            }}
+            InputLabelProps={{
+              sx: { color: '#000' }
+            }}
+          />
+          <TextField
             label="Recipient Address"
             value={toAddress}
-            onChange={(e) => setToAddress(e.target.value.trim())}
+            onChange={(e) => setToAddress(e.target.value)}
             fullWidth
             margin="normal"
             required
@@ -60,7 +113,7 @@ const TransferNFTModal = ({ isOpen, onClose }) => {
           <TextField
             label="Token ID"
             value={tokenId}
-            onChange={(e) => setTokenId(e.target.value.trim())}
+            onChange={(e) => setTokenId(e.target.value)}
             fullWidth
             margin="normal"
             required

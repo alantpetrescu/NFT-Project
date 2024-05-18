@@ -1,40 +1,32 @@
-import Web3 from 'web3';
+import web3 from '../context/web3';
 
-const requestAccount = async () => {
-  if (window.ethereum) {
-    try {
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      return accounts[0];
-    } catch (error) {
-      console.error('User denied account access', error);
-      throw error;
-    }
-  } else {
-    console.error('MetaMask is not installed');
-    throw new Error('MetaMask is not installed');
-  }
-};
-
-const sendTransaction = async (contractMethod, account, contractAddress) => {
-  const web3 = new Web3(window.ethereum);
-  const gasPrice = web3.utils.toWei('10', 'gwei');
+const sendTransaction = async (contractMethod, contractAddress, privateKey) => {
+  const gasPrice = await web3.eth.getGasPrice(); // Get the current gas price
   const gasLimit = 2000000;
+
+  const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+  web3.eth.accounts.wallet.add(account);
 
   const transactionParameters = {
     to: contractAddress,
-    from: account,
+    from: account.address,
     data: contractMethod.encodeABI(),
     gas: gasLimit,
     gasPrice: gasPrice,
   };
 
-  const txHash = await window.ethereum.request({
-    method: 'eth_sendTransaction',
-    params: [transactionParameters],
-  });
+  // Sign the transaction
+  const signedTx = await web3.eth.accounts.signTransaction(transactionParameters, privateKey);
 
-  console.log('Transaction sent:', txHash);
-  return txHash;
+  // Send the transaction
+  const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+
+  console.log('Transaction receipt:', txReceipt);
+  return txReceipt;
 };
 
-export { requestAccount, sendTransaction };
+const isAddressValid = (address) => {
+  return typeof address === 'string' && web3.utils.isAddress(address);
+};
+
+export { sendTransaction, isAddressValid };

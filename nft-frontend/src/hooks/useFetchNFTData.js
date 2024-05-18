@@ -25,9 +25,7 @@ const useFetchNFTData = () => {
             let owner = null;
             try {
               owner = await contract.methods.ownerOf(id).call();
-            } catch (error) {
-              console.error(`Error fetching owner for token ${id}:`, error);
-            }
+            } catch (error) {}
             
             if (isMounted) {
               return {

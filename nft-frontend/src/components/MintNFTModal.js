@@ -5,15 +5,16 @@ import { useSnackbar } from 'notistack';
 
 const MintNFTModal = ({ isOpen, onClose }) => {
   const { mintNFT, minting, error } = useMintNFT();
+  const [privateKey, setPrivateKey] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [tokenId, setTokenId] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const success = await mintNFT(toAddress.trim(), tokenId.trim());
+    const success = await mintNFT(privateKey.trim(), toAddress.trim(), tokenId.trim());
     if (success) {
-      enqueueSnackbar('NFT minted successfully!', { variant: 'success' });
+      enqueueSnackbar('Mint NFT successful!', { variant: 'success' });
       onClose();
     } else {
       enqueueSnackbar(error || 'Failed to mint NFT.', { variant: 'error' });
@@ -33,9 +34,35 @@ const MintNFTModal = ({ isOpen, onClose }) => {
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
+            label="Private Key"
+            type="password"
+            value={privateKey}
+            onChange={(e) => setPrivateKey(e.target.value)}
+            fullWidth
+            margin="normal"
+            required
+            variant="filled"
+            InputProps={{
+              sx: {
+                backgroundColor: '#ffffff',
+                color: '#000',
+                padding: '12px 14px',
+                '&:hover': {
+                  backgroundColor: '#ffffff'
+                },
+                '&.Mui-focused': {
+                  backgroundColor: '#ffffff'
+                }
+              }
+            }}
+            InputLabelProps={{
+              sx: { color: '#000' }
+            }}
+          />
+          <TextField
             label="Recipient Address"
             value={toAddress}
-            onChange={(e) => setToAddress(e.target.value.trim())}
+            onChange={(e) => setToAddress(e.target.value)}
             fullWidth
             margin="normal"
             required
@@ -60,7 +87,7 @@ const MintNFTModal = ({ isOpen, onClose }) => {
           <TextField
             label="Token ID"
             value={tokenId}
-            onChange={(e) => setTokenId(e.target.value.trim())}
+            onChange={(e) => setTokenId(e.target.value)}
             fullWidth
             margin="normal"
             required

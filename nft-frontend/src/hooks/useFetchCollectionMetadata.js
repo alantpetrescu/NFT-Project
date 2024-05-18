@@ -1,29 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import contract from '../contracts/contract';
 
 const useFetchCollectionMetadata = () => {
-  const [collectionName, setCollectionName] = useState('');
-  const [collectionSymbol, setCollectionSymbol] = useState('');
-  const [loadingMetadata, setLoadingMetadata] = useState(true);
+  const [metadata, setMetadata] = useState({ name: '', symbol: '' });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
         const name = await contract.methods.name().call();
         const symbol = await contract.methods.symbol().call();
-        setCollectionName(name);
-        setCollectionSymbol(symbol);
-      } catch (error) {
-        console.error('Error fetching collection metadata:', error);
+        setMetadata({ name, symbol });
+      } catch (err) {
+        console.error('Error fetching collection metadata', err);
+        setError(err.message);
       } finally {
-        setLoadingMetadata(false);
+        setLoading(false);
       }
     };
 
     fetchMetadata();
   }, []);
 
-  return { collectionName, collectionSymbol, loadingMetadata };
+  return { metadata, loading, error };
 };
 
 export default useFetchCollectionMetadata;

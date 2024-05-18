@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
-import { Container, Grid, CssBaseline, CircularProgress, Typography, Box, Button } from '@mui/material';
-import { SnackbarProvider } from 'notistack';
+import { Container, Grid, CssBaseline, CircularProgress, Button, Box, Typography } from '@mui/material'; // Adăugăm Typography aici
 import CardComponent from './components/CardComponent';
 import ModalComponent from './components/ModalComponent';
 import Navbar from './components/Navbar';
-import useFetchNFTData from './hooks/useFetchNFTData';
-import useFetchCollectionMetadata from './hooks/useFetchCollectionMetadata';
-import UpdateCollectionModal from './components/UpdateCollectionModal';
 import MintNFTModal from './components/MintNFTModal';
 import TransferNFTModal from './components/TransferNFTModal';
+import UpdateCollectionModal from './components/UpdateCollectionModal';
+import useFetchNFTData from './hooks/useFetchNFTData';
+import useFetchCollectionMetadata from './hooks/useFetchCollectionMetadata';
 import { useTheme } from '@mui/material/styles';
+import { SnackbarProvider } from 'notistack';
 
 function App() {
   const theme = useTheme();
   const { cardData, loading } = useFetchNFTData();
-  const { collectionName, collectionSymbol, loadingMetadata } = useFetchCollectionMetadata();
+  const { metadata, loading: loadingMetadata } = useFetchCollectionMetadata(); // Eliminăm metadataError
   const [selectedCard, setSelectedCard] = useState(null);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isMintModalOpen, setIsMintModalOpen] = useState(false);
-  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [mintModalOpen, setMintModalOpen] = useState(false);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
   const handleCardClick = (card) => {
     setSelectedCard(card);
@@ -28,74 +28,28 @@ function App() {
     setSelectedCard(null);
   };
 
-  const handleOpenUpdateModal = () => {
-    setIsUpdateModalOpen(true);
-  };
-
-  const handleCloseUpdateModal = () => {
-    setIsUpdateModalOpen(false);
-  };
-
-  const handleOpenMintModal = () => {
-    setIsMintModalOpen(true);
-  };
-
-  const handleCloseMintModal = () => {
-    setIsMintModalOpen(false);
-  };
-
-  const handleOpenTransferModal = () => {
-    setIsTransferModalOpen(true);
-  };
-
-  const handleCloseTransferModal = () => {
-    setIsTransferModalOpen(false);
-  };
-
-  const buttonStyles = {
-    mt: 2,
-    mr: 2,
-    bgcolor: theme.palette.secondary.main,
-    color: theme.palette.secondary.contrastText,
-    '&:hover': {
-      bgcolor: theme.palette.secondary.dark,
-    },
-    borderRadius: '8px',
-    boxShadow: '0 3px 5px 2px rgba(0, 0, 0, 0.5)', // Ajustare culoare shadow
-    fontWeight: 'bold',
-  };
-
   return (
-    <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+    <SnackbarProvider maxSnack={3}>
       <div style={{ backgroundColor: theme.palette.background.default, minHeight: '100vh', color: theme.palette.text.primary }}>
         <CssBaseline />
         <Navbar />
-        <Container style={{ paddingTop: '50px', paddingBottom: '50px' }}>
-          <Box textAlign="center" mb={5}>
-            <Typography variant="h3" component="h1" gutterBottom>
-              {loadingMetadata ? 'Loading Collection...' : collectionName}
-            </Typography>
-            <Typography variant="h6" component="h2" sx={{ color: theme.palette.secondary.main }}>
-              {loadingMetadata ? '' : `Symbol: ${collectionSymbol}`}
-            </Typography>
-            <Box>
-              <Button variant="contained" sx={buttonStyles} onClick={handleOpenUpdateModal}>
+        <Container style={{ paddingTop: '50px' }}>
+          {loadingMetadata ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+              <CircularProgress style={{ color: 'white' }} />
+            </div>
+          ) : (
+            <Box sx={{ mb: 4, textAlign: 'center' }}>
+              <Typography variant="h4">{metadata.name}</Typography>
+              <Typography variant="h6" sx={{ color: theme.palette.secondary.main }}>{metadata.symbol}</Typography>
+              <Button variant="outlined" color="secondary" onClick={() => setUpdateModalOpen(true)} sx={{ mt: 2 }}>
                 Update Collection Metadata
               </Button>
-              <Button variant="contained" sx={{ ...buttonStyles, mt: 2, mr: 0 }} onClick={handleOpenMintModal}>
-                Mint NFT
-              </Button>
-              <Button variant="contained" sx={{ ...buttonStyles, mt: 2, ml: 2 }} onClick={handleOpenTransferModal}>
-                Transfer NFT
-              </Button>
             </Box>
-          </Box>
-          <UpdateCollectionModal isOpen={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
-          <MintNFTModal isOpen={isMintModalOpen} onClose={handleCloseMintModal} />
-          <TransferNFTModal isOpen={isTransferModalOpen} onClose={handleCloseTransferModal} />
+          )}
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-              <CircularProgress style={{ color: theme.palette.primary.main }} />
+              <CircularProgress style={{ color: 'white' }} />
             </div>
           ) : (
             <Grid container spacing={3}>
@@ -121,8 +75,18 @@ function App() {
               id={selectedCard.id}
             />
           )}
-          <Box sx={{ height: '50px' }} /> {/* Space at the bottom */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+            <Button variant="outlined" color="secondary" onClick={() => setMintModalOpen(true)} sx={{ mt: 2, mr: 2 }}>
+              Mint NFT
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={() => setTransferModalOpen(true)} sx={{ mt: 2 }}>
+              Transfer NFT
+            </Button>
+          </Box>
         </Container>
+        <MintNFTModal isOpen={mintModalOpen} onClose={() => setMintModalOpen(false)} />
+        <TransferNFTModal isOpen={transferModalOpen} onClose={() => setTransferModalOpen(false)} />
+        <UpdateCollectionModal isOpen={updateModalOpen} onClose={() => setUpdateModalOpen(false)} />
       </div>
     </SnackbarProvider>
   );

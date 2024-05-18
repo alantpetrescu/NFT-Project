@@ -1,31 +1,27 @@
 import { useState } from 'react';
 import contract from '../contracts/contract';
-import { requestAccount, sendTransaction } from '../utils/transactionUtils';
+import { sendTransaction } from '../utils/transactionUtils';
 
 const useUpdateCollectionMetadata = () => {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
 
-  const updateMetadata = async (newName, newSymbol) => {
+  const updateMetadata = async (privateKey, newName, newSymbol) => {
     setUpdating(true);
     setError(null);
 
     try {
-      const account = await requestAccount();
-
-      // Set new name
       const setNameTx = contract.methods.setName(newName);
-      await sendTransaction(setNameTx, account, contract.options.address);
+      await sendTransaction(setNameTx, contract.options.address, privateKey);
 
-      // Set new symbol
       const setSymbolTx = contract.methods.setSymbol(newSymbol);
-      await sendTransaction(setSymbolTx, account, contract.options.address);
+      await sendTransaction(setSymbolTx, contract.options.address, privateKey);
 
-      return true; 
+      return true; // Success
     } catch (err) {
       console.error('Error sending transaction', err);
       setError(err.message);
-      return false; 
+      return false; // Failure
     } finally {
       setUpdating(false);
     }

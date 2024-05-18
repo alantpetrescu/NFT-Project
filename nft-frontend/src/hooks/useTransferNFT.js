@@ -1,20 +1,28 @@
 import { useState } from 'react';
 import contract from '../contracts/contract';
-import { requestAccount, sendTransaction } from '../utils/transactionUtils';
+import { sendTransaction, isAddressValid } from '../utils/transactionUtils';
 
 const useTransferNFT = () => {
   const [transferring, setTransferring] = useState(false);
   const [error, setError] = useState(null);
 
-  const transferNFT = async (toAddress, tokenId) => {
+  const transferNFT = async (privateKey, toAddress, tokenId) => {
     setTransferring(true);
     setError(null);
 
     try {
-      const account = await requestAccount();
+      if (!isAddressValid(toAddress)) {
+        throw new Error('Invalid Ethereum address');
+      }
 
-      const transferTx = contract.methods.transferFrom(account, toAddress, tokenId);
-      await sendTransaction(transferTx, account, contract.options.address);
+      const fromAddress = await contract.methods.ownerOf(tokenId).call();
+
+      if (!isAddressValid(fromAddress)) {
+        throw new Error('Invalid from address');
+      }
+
+      const transferTx = contract.methods.transferFrom(fromAddress, toAddress, tokenId);
+      await sendTransaction(transferTx, contract.options.address, privateKey);
 
       return true; // Success
     } catch (err) {
