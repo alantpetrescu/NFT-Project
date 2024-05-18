@@ -2,19 +2,19 @@ import { useState } from 'react';
 import contract from '../contracts/contract';
 import { requestAccount, sendTransaction } from '../utils/transactionUtils';
 
-const useMintNFT = () => {
-  const [minting, setMinting] = useState(false);
+const useTransferNFT = () => {
+  const [transferring, setTransferring] = useState(false);
   const [error, setError] = useState(null);
 
-  const mintNFT = async (toAddress, tokenId) => {
-    setMinting(true);
+  const transferNFT = async (toAddress, tokenId) => {
+    setTransferring(true);
     setError(null);
 
     try {
       const account = await requestAccount();
 
-      const mintTx = contract.methods.mint(toAddress, tokenId);
-      await sendTransaction(mintTx, account, contract.options.address);
+      const transferTx = contract.methods.transferFrom(account, toAddress, tokenId);
+      await sendTransaction(transferTx, account, contract.options.address);
 
       return true; // Success
     } catch (err) {
@@ -22,11 +22,11 @@ const useMintNFT = () => {
       setError(err.message);
       return false; // Failure
     } finally {
-      setMinting(false);
+      setTransferring(false);
     }
   };
 
-  return { mintNFT, minting, error };
+  return { transferNFT, transferring, error };
 };
 
-export default useMintNFT;
+export default useTransferNFT;

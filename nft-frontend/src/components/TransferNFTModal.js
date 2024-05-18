@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { Modal, Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
-import useMintNFT from '../hooks/useMintNFT';
+import useTransferNFT from '../hooks/useTransferNFT';
 import { useSnackbar } from 'notistack';
 
-const MintNFTModal = ({ isOpen, onClose }) => {
-  const { mintNFT, minting, error } = useMintNFT();
+const TransferNFTModal = ({ isOpen, onClose }) => {
+  const { transferNFT, transferring, error } = useTransferNFT();
   const [toAddress, setToAddress] = useState('');
   const [tokenId, setTokenId] = useState('');
   const { enqueueSnackbar } = useSnackbar();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const success = await mintNFT(toAddress.trim(), tokenId.trim());
+    const success = await transferNFT(toAddress.trim(), tokenId.trim());
     if (success) {
-      enqueueSnackbar('NFT minted successfully!', { variant: 'success' });
+      enqueueSnackbar('NFT transferred successfully!', { variant: 'success' });
       onClose();
     } else {
-      enqueueSnackbar(error || 'Failed to mint NFT.', { variant: 'error' });
+      enqueueSnackbar(error || 'Failed to transfer NFT.', { variant: 'error' });
     }
   };
 
@@ -24,12 +24,12 @@ const MintNFTModal = ({ isOpen, onClose }) => {
     <Modal
       open={isOpen}
       onClose={onClose}
-      aria-labelledby="mint-nft-modal-title"
-      aria-describedby="mint-nft-modal-description"
+      aria-labelledby="transfer-nft-modal-title"
+      aria-describedby="transfer-nft-modal-description"
     >
       <Box sx={modalStyle}>
-        <Typography id="mint-nft-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
-          Mint NFT
+        <Typography id="transfer-nft-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+          Transfer NFT
         </Typography>
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
@@ -82,8 +82,8 @@ const MintNFTModal = ({ isOpen, onClose }) => {
               sx: { color: '#000' }
             }}
           />
-          <Button type="submit" variant="contained" color="secondary" fullWidth disabled={minting} sx={{ mt: 2 }}>
-            {minting ? <CircularProgress size={24} /> : 'Mint'}
+          <Button type="submit" variant="contained" color="secondary" fullWidth disabled={transferring} sx={{ mt: 2 }}>
+            {transferring ? <CircularProgress size={24} /> : 'Transfer'}
           </Button>
           {error && (
             <Typography color="error" sx={{ mt: 2 }}>
@@ -109,4 +109,4 @@ const modalStyle = {
   borderRadius: '12px',
 };
 
-export default MintNFTModal;
+export default TransferNFTModal;

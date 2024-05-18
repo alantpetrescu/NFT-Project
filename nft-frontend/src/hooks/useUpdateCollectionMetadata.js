@@ -1,45 +1,31 @@
 import { useState } from 'react';
-import Web3 from 'web3';
 import contract from '../contracts/contract';
+import { requestAccount, sendTransaction } from '../utils/transactionUtils';
 
 const useUpdateCollectionMetadata = () => {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
 
-  const updateMetadata = async (privateKey, newName, newSymbol) => {
+  const updateMetadata = async (newName, newSymbol) => {
     setUpdating(true);
     setError(null);
 
     try {
-      const web3 = new Web3('https://rpc-amoy.polygon.technology');
-      const formattedPrivateKey = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
-      const account = web3.eth.accounts.privateKeyToAccount(formattedPrivateKey);
-      web3.eth.accounts.wallet.add(account);
-
-      const gasLimit = 2000000;
+      const account = await requestAccount();
 
       // Set new name
       const setNameTx = contract.methods.setName(newName);
-      await web3.eth.sendTransaction({
-        from: account.address,
-        to: contract.options.address,
-        gas: gasLimit,
-        data: setNameTx.encodeABI()
-      });
+      await sendTransaction(setNameTx, account, contract.options.address);
 
       // Set new symbol
       const setSymbolTx = contract.methods.setSymbol(newSymbol);
-      await web3.eth.sendTransaction({
-        from: account.address,
-        to: contract.options.address,
-        gas: gasLimit,
-        data: setSymbolTx.encodeABI()
-      });
+      await sendTransaction(setSymbolTx, account, contract.options.address);
 
-      return true; // Success
+      return true; 
     } catch (err) {
+      console.error('Error sending transaction', err);
       setError(err.message);
-      return false; // Failure
+      return false; 
     } finally {
       setUpdating(false);
     }

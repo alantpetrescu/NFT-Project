@@ -8,6 +8,7 @@ import useFetchNFTData from './hooks/useFetchNFTData';
 import useFetchCollectionMetadata from './hooks/useFetchCollectionMetadata';
 import UpdateCollectionModal from './components/UpdateCollectionModal';
 import MintNFTModal from './components/MintNFTModal';
+import TransferNFTModal from './components/TransferNFTModal';
 import { useTheme } from '@mui/material/styles';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
 
   const handleCardClick = (card) => {
     setSelectedCard(card);
@@ -40,6 +42,14 @@ function App() {
 
   const handleCloseMintModal = () => {
     setIsMintModalOpen(false);
+  };
+
+  const handleOpenTransferModal = () => {
+    setIsTransferModalOpen(true);
+  };
+
+  const handleCloseTransferModal = () => {
+    setIsTransferModalOpen(false);
   };
 
   const buttonStyles = {
@@ -68,15 +78,21 @@ function App() {
             <Typography variant="h6" component="h2" sx={{ color: theme.palette.secondary.main }}>
               {loadingMetadata ? '' : `Symbol: ${collectionSymbol}`}
             </Typography>
-            <Button variant="contained" sx={buttonStyles} onClick={handleOpenUpdateModal}>
-              Update Collection Metadata
-            </Button>
-            <Button variant="contained" sx={{ ...buttonStyles, mt: 2, mr: 0 }} onClick={handleOpenMintModal}>
-              Mint NFT
-            </Button>
+            <Box>
+              <Button variant="contained" sx={buttonStyles} onClick={handleOpenUpdateModal}>
+                Update Collection Metadata
+              </Button>
+              <Button variant="contained" sx={{ ...buttonStyles, mt: 2, mr: 0 }} onClick={handleOpenMintModal}>
+                Mint NFT
+              </Button>
+              <Button variant="contained" sx={{ ...buttonStyles, mt: 2, ml: 2 }} onClick={handleOpenTransferModal}>
+                Transfer NFT
+              </Button>
+            </Box>
           </Box>
           <UpdateCollectionModal isOpen={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
           <MintNFTModal isOpen={isMintModalOpen} onClose={handleCloseMintModal} />
+          <TransferNFTModal isOpen={isTransferModalOpen} onClose={handleCloseTransferModal} />
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
               <CircularProgress style={{ color: theme.palette.primary.main }} />
