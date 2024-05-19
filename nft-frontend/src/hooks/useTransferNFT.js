@@ -6,19 +6,13 @@ const useTransferNFT = () => {
   const [transferring, setTransferring] = useState(false);
   const [error, setError] = useState(null);
 
-  const transferNFT = async (privateKey, toAddress, tokenId) => {
+  const transferNFT = async (privateKey, fromAddress, toAddress, tokenId) => {
     setTransferring(true);
     setError(null);
 
     try {
-      if (!isAddressValid(toAddress)) {
+      if (!isAddressValid(fromAddress) || !isAddressValid(toAddress)) {
         throw new Error('Invalid Ethereum address');
-      }
-
-      const fromAddress = await contract.methods.ownerOf(tokenId).call();
-
-      if (!isAddressValid(fromAddress)) {
-        throw new Error('Invalid from address');
       }
 
       const transferTx = contract.methods.transferFrom(fromAddress, toAddress, tokenId);
