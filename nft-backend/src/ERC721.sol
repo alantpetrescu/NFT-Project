@@ -16,6 +16,34 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
 
     error ERC721NotTheCreator(address creator, address impostor);
 
+    modifier onlyCreator() {
+        if (msg.sender != _creator)
+            revert ERC721NotTheCreator(_creator, msg.sender);
+        _;
+    }
+    modifier validOwner(address owner) {
+        if (owner == address(0)) revert ERC721InvalidOwner(owner);
+        _;
+    }
+
+    modifier validContract(
+        address to,
+        uint256 id,
+        bytes memory data
+    ) {
+        _;
+        if (
+            _isContract(to) &&
+            IERC721TokenReceiver(to).onERC721Received(
+                msg.sender,
+                address(0),
+                id,
+                data
+            ) !=
+            IERC721TokenReceiver.onERC721Received.selector
+        ) revert ERC721InvalidReceiver(to);
+    }
+
     string internal _name;
 
     string internal _symbol;
@@ -44,22 +72,15 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
                          METADATA SETTERS
     //////////////////////////////////////////////////////////////*/
 
-    function setName(string memory newName) external {
-        if (msg.sender != _creator)
-            revert ERC721NotTheCreator(_creator, msg.sender);
+    function setName(string memory newName) external onlyCreator {
         _name = newName;
     }
 
-    function setSymbol(string memory newSymbol) external {
-        if (msg.sender != _creator)
-            revert ERC721NotTheCreator(_creator, msg.sender);
+    function setSymbol(string memory newSymbol) external onlyCreator {
         _symbol = newSymbol;
     }
 
-    function setBaseURI(string memory newBaseURI) external {
-        if (msg.sender != _creator)
-            revert ERC721NotTheCreator(_creator, msg.sender);
-
+    function setBaseURI(string memory newBaseURI) external onlyCreator {
         _baseURI = newBaseURI;
     }
 
@@ -108,9 +129,7 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
 
     function balanceOf(
         address owner
-    ) public view virtual override returns (uint256) {
-        if (owner == address(0)) revert ERC721InvalidOwner(owner);
-
+    ) public view virtual override validOwner(owner) returns (uint256) {
         return _balanceOf[owner];
     }
 
@@ -195,19 +214,8 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
         address from,
         address to,
         uint256 id
-    ) external payable virtual override {
+    ) external payable virtual override validContract(to, id, "") {
         transferFrom(from, to, id);
-
-        if (
-            _isContract(to) &&
-            IERC721TokenReceiver(to).onERC721Received(
-                msg.sender,
-                from,
-                id,
-                ""
-            ) !=
-            IERC721TokenReceiver.onERC721Received.selector
-        ) revert ERC721InvalidReceiver(to);
     }
 
     function safeTransferFrom(
@@ -215,19 +223,8 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
         address to,
         uint256 id,
         bytes memory data
-    ) external payable virtual override {
+    ) external payable virtual override validContract(to, id, data) {
         transferFrom(from, to, id);
-
-        if (
-            _isContract(to) &&
-            IERC721TokenReceiver(to).onERC721Received(
-                msg.sender,
-                from,
-                id,
-                data
-            ) !=
-            IERC721TokenReceiver.onERC721Received.selector
-        ) revert ERC721InvalidReceiver(to);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -247,10 +244,7 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function mint(address to, uint256 id) public virtual {
-        if (msg.sender != _creator)
-            revert ERC721NotTheCreator(_creator, msg.sender);
-
+    function mint(address to, uint256 id) public virtual onlyCreator {
         if (to == address(0)) revert ERC721InvalidReceiver(to);
 
         if (_ownerOf[id] != address(0))
@@ -265,10 +259,7 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
         emit Transfer(address(0), to, id);
     }
 
-    function burn(uint256 id) public virtual {
-        if (msg.sender != _creator)
-            revert ERC721NotTheCreator(_creator, msg.sender);
-
+    function burn(uint256 id) public virtual onlyCreator {
         address owner = _ownerOf[id];
 
         if (owner == address(0)) revert ERC721NonexistentToken(id);
@@ -286,38 +277,19 @@ contract ERC721 is IERC721Metadata, ERC165, IERC721Errors {
                         INTERNAL SAFE MINT LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function safeMint(address to, uint256 id) external virtual {
+    function safeMint(
+        address to,
+        uint256 id
+    ) external virtual validContract(to, id, "") {
         mint(to, id);
-
-        if (
-            _isContract(to) &&
-            IERC721TokenReceiver(to).onERC721Received(
-                msg.sender,
-                address(0),
-                id,
-                ""
-            ) !=
-            IERC721TokenReceiver.onERC721Received.selector
-        ) revert ERC721InvalidReceiver(to);
     }
 
     function safeMint(
         address to,
         uint256 id,
         bytes memory data
-    ) external virtual {
+    ) external virtual validContract(to, id, data) {
         mint(to, id);
-
-        if (
-            _isContract(to) &&
-            IERC721TokenReceiver(to).onERC721Received(
-                msg.sender,
-                address(0),
-                id,
-                data
-            ) !=
-            IERC721TokenReceiver.onERC721Received.selector
-        ) revert ERC721InvalidReceiver(to);
     }
 
     /*//////////////////////////////////////////////////////////////

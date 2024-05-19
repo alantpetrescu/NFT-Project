@@ -30,7 +30,7 @@ contract ERC721Test is Test {
         nft = new ERC721(
             "test",
             "TST",
-            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm"
+            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm/"
         );
     }
 
@@ -51,7 +51,7 @@ contract ERC721Test is Test {
     function test_BaseURI_ExpectText() public view {
         assertEq(
             nft.baseURI(),
-            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm"
+            "ipfs://bafybeigelcb33rltlwswd4g5mulbbvuj4rfwofbzstm522hbx4l3wiqnfm/"
         );
     }
 
